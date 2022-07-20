@@ -6,6 +6,6 @@ function getAllPlanets(req, res){
     // explicit with response code
 }
 
-modules.exports = {
+module.exports = {
     getAllPlanets
 };
