@@ -13,8 +13,8 @@ app.use(morgan('combined'));
 
 app.use(express.json()); // parse any json data
 app.use(express.static(path.join(__dirname,'public')));
-app.use(planetsRouter);
-app.use(launchesRouter);
+app.use('/planets', planetsRouter);
+app.use('/launches', launchesRouter);
 
 //matches any endpoint to index.html
 app.get('/*', (req, res) => {
