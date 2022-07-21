@@ -47,9 +47,11 @@ function loadPlanetsData(){
     // readable.pipe(writable);
 }
 
-
+function httpGetAllPlanets(){
+    return habitablePlanets;
+}
 
 module.exports = {
     loadPlanetsData,
-    planets: habitablePlanets
+    httpGetAllPlanets,
 };
