@@ -7,14 +7,14 @@ const launchesRouter = require('./src/routes/launches/launches.router')
 const app = express();
 
 app.use(cors({
-    origin: 'http://localhost:3000'
+    origin: 'http://localhost:8000'
 }));
 app.use(morgan('combined'));
 
 app.use(express.json()); // parse any json data
 app.use(express.static(path.join(__dirname,'public')));
 app.use('/planets', planetsRouter);
-app.use('/launches', launchesRouter);
+app.use('/launch', launchesRouter);
 
 //matches any endpoint to index.html
 app.get('/*', (req, res) => {
