@@ -1,7 +1,6 @@
 const http = require('http');
 const app = require('./app');
 const mongoose = require('mongoose');
-
 const server = http.createServer(app);
 const PORT = process.env.PORT || 8000; // cross-env for all platforms
 const { loadPlanetsData } = require('./src/models/planets.model');
