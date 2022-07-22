@@ -53,7 +53,7 @@ function loadPlanetsData(){
 // async on odd place make the other parts wait which cause failure 
 
 async function GetAllPlanets(){
-    return await planets.find({});
+    return await planets.find({},{'_id':0, '__v':0});
     //filter, projection(only selected fields will show up)
     //age: {$gte:18}
 }
