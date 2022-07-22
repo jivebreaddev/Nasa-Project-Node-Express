@@ -33,3 +33,7 @@ const launchesSchema = new mongoose.Schema({
 
     
 });
+// 
+mongoose.model('Launch', launchesSchema);
+
+module.exports = mongoose.model('Launch', launchesSchema);

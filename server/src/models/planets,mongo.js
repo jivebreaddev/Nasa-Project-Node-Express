@@ -7,3 +7,5 @@ const planetSchema = new mongoose.Schema({
     }
 
 });
+// connects lauches shcema with the lauches collection
+module.exports = mongoose.model('Planet', planetSchema);
