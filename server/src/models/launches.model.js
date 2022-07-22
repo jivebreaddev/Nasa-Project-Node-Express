@@ -1,4 +1,4 @@
-const launches = new Map();
+const launches = new Map(); // this will need to stay in db.
 
 let latestFlightNumber = 100;
 const launch = {
