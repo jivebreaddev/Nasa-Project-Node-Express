@@ -1,8 +1,9 @@
-// const launches = require('./launches.mongo');
+const launches = require('./launches.mongo');
+const planets = require('./planets.mongo');
+// const launches = new Map(); // this will need to stay in db.
 
-const launches = new Map(); // this will need to stay in db.
-
-let latestFlightNumber = 100;
+const DEFAULT_FLIGHT_NUMBER = 100;
+// How to keep referential Integrity when the values are not right
 const launch = {
     flightNumber: 100,
     mission: 'Kepler Exploration X',
@@ -13,12 +14,37 @@ const launch = {
     upcoming: true,
     success: true,
 };
+saveLaunch(launch);
+// get the highest flight number
+async function getLatestFlightNumber(){
+    const latestLaunch = await launches
+        .findOne()
+        .sort('-flightNumber');
 
-launches.set(launch.flightNumber, launch);
-
-function getAllLaunches(){
-    return Array.from(launches.values());
+    if (!latestLaunch){
+        return DEFAULT_FLIGHT_NUMBER;
+    }
+    return latestLaunch.flightNumber;
 }
+
+async function getAllLaunches(){
+    return await launches.find({}, {'_id': 0, '__v': 0});
+}
+
+async function saveLaunch(launch){
+    const planet = await planets.findOne({
+        kepler_name: launch.target,
+    });
+    // how do we signal error from data access layer???
+    if (!planet){
+        throw new Error('No matching planet is found');
+    }
+    await launches.updateOne({
+        flightNumber: launch.flightNumber,
+    }, launch,{
+        upsert: true,
+    })
+}// filter using first arg, second insert and thirt upsert args
 function addNewLaunch(launch){
     latestFlightNumber++;
     launches.set(
