@@ -12,7 +12,7 @@ mongoose.connection.on('open', () => {
 mongoose.connection.on('error', (err) => {
     console.error(err);
 });
-async function startServer(){
+async function startServer() {
     await mongoose.connect(MONGO_URL);
     await loadPlanetsData();
     server.listen(PORT, () => {
