@@ -79,16 +79,11 @@ async function abortLaunchById(launchId) {
         })
 
     return aborted.modifiedCount === 1;
-    // const aborted = launches.get(launchId);
-
-    // aborted.upcoming = false;
-    // aborted.success = false;
-    // return aborted;
 }
 module.exports = {
     getAllLaunches,
     existsLaunchWithId,
     scheduleNewLaunch,
     abortLaunchById
-};
+}; 
 
