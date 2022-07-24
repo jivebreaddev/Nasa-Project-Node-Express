@@ -4,17 +4,6 @@ const planets = require('./planets.mongo');
 const axios = require('axios');
 const DEFAULT_FLIGHT_NUMBER = 100;
 // How to keep referential Integrity when the values are not right
-const launch = {
-    flightNumber: 100,
-    mission: 'Kepler Exploration X',
-    rocket: 'Explorer IS1',
-    launchDate: new Date('Decemeber 27, 2030'),
-    target: 'Kepler-442 b',
-    customer: ['ZTM', 'NASA'],
-    upcoming: true,
-    success: true,
-};
-saveLaunch(launch);
 // get the highest flight number
 async function getLatestFlightNumber() {
     const latestLaunch = await launches
@@ -27,8 +16,12 @@ async function getLatestFlightNumber() {
     return latestLaunch.flightNumber;
 }
 
-async function getAllLaunches() {
-    return await launches.find({}, { '_id': 0, '__v': 0 });
+async function getAllLaunches(skip, limit) {
+    return await launches.find({}, { '_id': 0, '__v': 0 })
+    .sort({flightNumber: 1 })
+    .skip(skip)
+    .limit(limit);
+    // Pagination implementing
 }
 
 async function saveLaunch(launch) {
@@ -91,6 +84,11 @@ async function populateLaunches(){
             ]
         }
     });
+
+    if (response.status !== 200){
+        console.log('Problem downloading launch data');
+        throw new Error('Launch data download failed');
+    }
     const launchDocs = response.data.docs;
     for (const launchDoc of launchDocs) {
         const payloads = launchDoc['payloads'];
