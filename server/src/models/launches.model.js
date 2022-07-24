@@ -32,13 +32,7 @@ async function getAllLaunches() {
 }
 
 async function saveLaunch(launch) {
-    const planet = await planets.findOne({
-        kepler_name: launch.target,
-    });
-    // how do we signal error from data access layer???
-    if (!planet) {
-        throw new Error('No matching planet is found');
-    }
+
     // when used update one it will return h $setOnInsert when upsert op is done.
     await launches.findOneandUpdate({
         flightNumber: launch.flightNumber,
@@ -48,6 +42,13 @@ async function saveLaunch(launch) {
 }// filter using first arg, second insert and thirt upsert args
 
 async function scheduleNewLaunch(launch) {
+    const planet = await planets.findOne({
+        kepler_name: launch.target,
+    });
+    // how do we signal error from data access layer???
+    if (!planet) {
+        throw new Error('No matching planet is found');
+    }
     const newFlightNumber = await getLatestFlightNumber() + 1;
 
     const newLaunch = Object.assign(launch, {
@@ -69,8 +70,8 @@ async function existsLaunchWithId(launchId) {
 }
 
 const SPACEX_API_URL = 'https://api.spacexdata.com/v4/launches/query';
-async function loadLaunchesData(){
-    console.log('Downloading data from SPACEAPI')
+
+async function populateLaunches(){
     const response = await axios.post(SPACEX_API_URL, {
         query: {},
         options: {
@@ -110,10 +111,29 @@ async function loadLaunchesData(){
     }
 
     console.log(`${launch.flightNumber}`)
+
+    //TODO
+    await saveLaunch(launch);
+
+}
+async function loadLaunchesData(){
+    await findLaunch({
+        flightNumber: 1,
+    })
+    if (firstLaunch){
+        console.log('Launch data already loaded');
+        return;
+    } else{
+        populateLaunches();
+    }
+}
+
+async function findLaunch(filter) {
+    return await launches.findOne(filter);
 }
 async function abortLaunchById(launchId) {
 
-    const aborted = await launches.updateOne({
+    const aborted = await findLaunch({
         flightNumber: launchId,
     },
         {
@@ -143,3 +163,4 @@ date_local    | launchDate
 upcoming      | upcoming
 payload.customers | customers
 */
+
