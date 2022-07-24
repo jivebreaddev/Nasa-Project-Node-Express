@@ -1,7 +1,7 @@
 const launches = require('./launches.mongo');
 const planets = require('./planets.mongo');
 // const launches = new Map(); // this will need to stay in db.
-
+const axios = require('axios');
 const DEFAULT_FLIGHT_NUMBER = 100;
 // How to keep referential Integrity when the values are not right
 const launch = {
@@ -68,6 +68,49 @@ async function existsLaunchWithId(launchId) {
     });
 }
 
+const SPACEX_API_URL = 'https://api.spacexdata.com/v4/launches/query';
+async function loadLaunchesData(){
+    console.log('Downloading data from SPACEAPI')
+    const response = await axios.post(SPACEX_API_URL, {
+        query: {},
+        options: {
+            populate: [
+                {
+                    path: 'rocket',
+                    select: {
+                        name: 1
+                    }
+                },
+                {
+                    path: 'payloads',
+                    select: {
+                        'customers': 1
+                    }
+                }
+            ]
+        }
+    });
+    const launchDocs = response.data.docs;
+    for (const launchDoc of launchDocs) {
+        const payloads = launchDoc['payloads'];
+        //flatMap() -> flat the array and call callback function and flat the results again
+        const customers = payloads.flatMap((payload) => {
+            return payload['customers'];
+        });
+
+        const launch = {
+            flightNumber: launchDoc['flight_number'],
+            mission : launchDoc['name'],
+            rocket: launchDoc['rocket']['name'],
+            launchDate: launchDoc['date_local'],
+            upcoming: launchDoc['upcoming'],
+            success: launchDoc['success'],
+            customers
+        }
+    }
+
+    console.log(`${launch.flightNumber}`)
+}
 async function abortLaunchById(launchId) {
 
     const aborted = await launches.updateOne({
@@ -84,6 +127,19 @@ module.exports = {
     getAllLaunches,
     existsLaunchWithId,
     scheduleNewLaunch,
-    abortLaunchById
+    abortLaunchById,
+    loadLaunchesData
 }; 
 
+/*
+mapping corresponding spaceAPI values to 
+database values
+SPACE API     | 
+flight_number | flightNumber
+success       | success
+mission       | name
+rocket.name   | rocket
+date_local    | launchDate
+upcoming      | upcoming
+payload.customers | customers
+*/
