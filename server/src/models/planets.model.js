@@ -1,10 +1,10 @@
 const fs = require('fs');
 const path = require('path');
 const {parse} = require('csv-parse');
-
+const planets = require('./planets.mongo');
 const { resourceLimits } = require('worker_threads');
 const results = [];
-const habitablePlanets = [];
+
 
 function isHabitablePlanet(planet){
     return planet['koi_disposition' ] === 'CONFIRMED' 
@@ -28,11 +28,14 @@ function loadPlanetsData(){
         .pipe(parse({
             comment: "#",
             columns: true,
-        }))
-        .on('data', (data) =>{
+        }))// Every time loadPlanetData is called in cluster, or restart the server, we will be calling load planet data many times
+        // upsert operation is needed
+        .on('data', async (data) =>{
             if (isHabitablePlanet(data)){
-                habitablePlanets.push(data);
-            }
+                // TO DO this has to match the schema
+                await savePlanet(data);
+            }// if first already exists won't do anything
+            // update using upsert
             
         })
         .on('error' , (err)=> {
@@ -40,9 +43,7 @@ function loadPlanetsData(){
             reject(err);
         })
         .on('end', () => {
-        
-            console.log(`${habitablePlanets.length}`);
-            console.log('done');
+    
             resolve();
         });
         
@@ -51,8 +52,26 @@ function loadPlanetsData(){
 }
 // async on odd place make the other parts wait which cause failure 
 
-function GetAllPlanets(){
-    return habitablePlanets;
+async function GetAllPlanets(){
+    return await planets.find({},{'_id':0, '__v':0});
+    //filter, projection(only selected fields will show up)
+    //age: {$gte:18}
+}
+// wrong parameter lead to no debugging code at all...
+// what a hard time 
+async function savePlanet(data){
+    try{
+        await planets.updateOne({
+            kepler_name: data.kepler_name,
+        },{
+            kepler_name: data.kepler_name,
+        },{
+            upsert: true,
+        });
+    } catch(err){
+        console.error('Could not save planet');
+    }
+    
 }
 
 module.exports = {
