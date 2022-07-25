@@ -9,11 +9,10 @@
     "install": "npm install-server & npm install-client",
     "server": "npm run watch --prefix server",
     "client": "npm start --prefix client",
-    "watch": "npm run server & npm run client" ,
+    "watch": "npm run server & npm run client",
     "deploy": "npm run build --prefix client && npm start --prefix server",
     "deploy-cluster": "npm run build --prefix client && npm run cluster --prefix server",
     "test": "npm test --prefix server && npm test --prefix client"
-    
   },
   "repository": {
     "type": "git",
@@ -24,5 +23,8 @@
   "bugs": {
     "url": "https://github.com/jivebreaddev/Nasa-Project-Node-Express/issues"
   },
-  "homepage": "https://github.com/jivebreaddev/Nasa-Project-Node-Express#readme"
+  "homepage": "https://github.com/jivebreaddev/Nasa-Project-Node-Express#readme",
+  "dependencies": {
+    "helmet": "^5.1.1"
+  }
 }
